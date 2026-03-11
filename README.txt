@@ -1,9 +1,10 @@
 File Structure
 
-venv/
-archive/ -- this is the downloaded file from kaggle
-.gitignore -- don't upload images to github. add them to your ignore file.
-                github wont let you do it anyway
+venv/ - virtual envirmoent you make yourself 
+archive/ -- this is the downloaded file from kaggle 
+.gitignore -- file tells github which files not to include in your add .
+
+## the data folder youll have to contruct yourself from the archive folder ##
 data/ - folder holding all images in there class folder
     0/ - folder conatains all images for that class
         img1.jpg
