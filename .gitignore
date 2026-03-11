@@ -8,6 +8,8 @@ venv/
 # Data
 data/
 archive\American Sign Language Digits Dataset
+archive.zip
+*.zip
 
 # OS files
 .DS_Store
