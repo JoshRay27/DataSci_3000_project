@@ -3,6 +3,10 @@ File Structure
 venv/ - virtual envirmoent you make yourself 
 archive/ -- this is the downloaded file from kaggle 
 .gitignore -- file tells github which files not to include in your add .
+models/
+    simple_CNN.py
+    Add more models here for testing
+    
 
 ## the data folder youll have to contruct yourself from the archive folder ##
 data/ - folder holding all images in there class folder
@@ -21,7 +25,6 @@ data/ - folder holding all images in there class folder
     9/
 Dataloader.py
 dataset.py
-model.py
 train.py
 trainning.py
 visionPreprocess.py
