@@ -5,7 +5,7 @@ from model import SimpleCNN
 from training import train, evaluate
 
 DATA_DIR = "data/"
-BATCH_SIZE = 3
+BATCH_SIZE = 1
 NUM_CLASSES = 10
 
 def main():

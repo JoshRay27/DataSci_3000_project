@@ -2,12 +2,13 @@ import cv2
 import numpy as np
 import os
 
-def preprocess_image(img, size=(128,128)):
+def preprocess_image(img, file_name, size=(128,128), ):
     """Apply standard ML preprocessing to a single image."""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
     denoised = cv2.GaussianBlur(resized, (5,5),0)
     normalized = denoised.astype("float32") / 255.0
+    print(f"Processed: {file_name}")
     return normalized
 
 def process_folder(input_folder, output_folder, size=(128,128)):
@@ -33,8 +34,8 @@ def process_folder(input_folder, output_folder, size=(128,128)):
             print(f"Processed: {filename}")
 
 
-process_folder(
-    input_folder="archive/American Sign Language Digits Dataset/0/Input Images - Sign 0",
-    output_folder="test0",
-    size=(128,128)
-)
+#process_folder(
+#    input_folder="archive/American Sign Language Digits Dataset/0/Input Images - Sign 0",
+#    output_folder="test0",
+#    size=(128,128)
+#)

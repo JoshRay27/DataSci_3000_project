@@ -20,17 +20,24 @@ def evaluate(model, loader):
     criterion = nn.CrossEntropyLoss()
     total, correct, total_loss = 0, 0, 0
 
+    all_preds = []
+    all_labels= []
     with torch.no_grad():
         for imgs, labels in loader:
             preds = model(imgs)
             loss = criterion(preds, labels)
-            total_loss += labels.size(0)
-
+            total_loss += loss + labels.size(0)
             predicted = preds.argmax(dim=1)
+            #print(f"predicted: {predicted}")
+            all_preds.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
             correct += (predicted == labels).sum().item()
+            
             total += labels.size(0)
 
-        avg_loss = total_loss / len(loader)
+        print(f"correct: {correct} Total: {total}")
+        avg_loss = total_loss / total
         accuracy = correct / total
         return avg_loss, accuracy
     

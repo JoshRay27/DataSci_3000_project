@@ -3,6 +3,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
+from visionPreprocess import preprocess_image
+import cv2
 
 class PreprocessedImageDataset(Dataset):
     def __init__(self, root_dir):
@@ -20,7 +22,10 @@ class PreprocessedImageDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path, label = self.samples[idx]
-        img = Image.open(img_path).convert("L")
+
+        img = cv2.imread(img_path)#Image.open(img_path).convert("L")
+        img = preprocess_image(img, file_name=img_path)
+
         img = torch.tensor(np.array(img), dtype=torch.float32)
         img = img.unsqueeze(0)  # (1, H, W)
         return img, label
