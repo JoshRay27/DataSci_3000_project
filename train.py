@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader, random_split
 
 from dataset import PreprocessedImageDataset
-from model import SimpleCNN
+from models.model_CNN import SimpleCNN
 from training import train, evaluate
 
 DATA_DIR = "data/"
