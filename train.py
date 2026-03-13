@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader, random_split
 
 from dataset import PreprocessedImageDataset
 from models.model_CNN import SimpleCNN
+from models.SVM import SVMClassifier
 from training import train, evaluate
 
 DATA_DIR = "data/"
@@ -12,13 +13,14 @@ def main():
     # load full dataset
     dataset = PreprocessedImageDataset(DATA_DIR)
 
-    # comput split sizes
+    # compute split sizes
     total = len(dataset)
     print(f"Length of dataset: {total}")
 
     train_size = int(0.7 * total)
     val_size = int(0.15 * total)
     test_size = total - train_size - val_size
+
     #Perform Split
     train_ds, val_ds, test_ds = random_split(dataset, [train_size, val_size, test_size])
     
@@ -28,11 +30,15 @@ def main():
     #test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
     model_CNN = SimpleCNN(num_classes=NUM_CLASSES)
+    sample, _ = dataset[0]
+    input_dim = sample.numel()
+    model_SVM = SVMClassifier(input_dim=input_dim, num_classes=10)
+    #train(model_CNN, train_loader, epochs=5, lr=1e-3)
 
-    train(model_CNN, train_loader, epochs=5, lr=1e-3)
+    train(model_SVM, train_loader, epochs=5, lr=1e-3)
 
-    print("Model_CNN Evaluation")
-    print(evaluate(model_CNN, val_loader))
+    print("Model_SVM Evaluation")
+    print(evaluate(model_SVM, val_loader))
 
 if __name__ == "__main__":
     main()
