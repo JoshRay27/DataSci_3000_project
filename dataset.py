@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
-from visionPreprocess import preprocess_image
+from visionPreprocess import preprocess_image, preprocess_live
 import cv2
 
 class PreprocessedImageDataset(Dataset):
@@ -26,11 +26,11 @@ class PreprocessedImageDataset(Dataset):
         # Retrieve the (image_path, label) pair at the given index
         img_path, label = self.samples[idx]
         img = cv2.imread(img_path) # Load the image using OpenCV (BGR format)
-        img = preprocess_image(img, file_name=img_path) # (resize, grayscale, normalization, etc)
+        img = preprocess_live(img) # (resize, grayscale, normalization, etc)
         # add channel dimension: (H, W) -> (1, H, W)
         # PyTorch expects images in (C, H, W) format
         img = torch.tensor(np.array(img), dtype=torch.float32)
-        img = img.unsqueeze(0)  # (1, H, W)
+        #img = img.unsqueeze(0)  # (1, H, W)
 
         # Return the image tensor and its label
         return img, label

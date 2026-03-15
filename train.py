@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader, random_split
-
+import torch
 from dataset import PreprocessedImageDataset
 from models.model_CNN import SimpleCNN
 from models.SVM import SVMClassifier
@@ -30,15 +30,16 @@ def main():
     #test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
     model_CNN = SimpleCNN(num_classes=NUM_CLASSES)
-    sample, _ = dataset[0]
-    input_dim = sample.numel()
-    model_SVM = SVMClassifier(input_dim=input_dim, num_classes=10)
-    #train(model_CNN, train_loader, epochs=5, lr=1e-3)
-
-    train(model_SVM, train_loader, epochs=5, lr=1e-3)
+    #sample, _ = dataset[0]
+    #input_dim = sample.numel()
+    #model_SVM = SVMClassifier(input_dim=input_dim, num_classes=10)
+    train(model_CNN, train_loader, epochs=5, lr=1e-3)
+    torch.save(model_CNN.state_dict(), "cnn_model.pth")
+    print("model saved")
+    #train(model_SVM, train_loader, epochs=5, lr=1e-3)
 
     print("Model_SVM Evaluation")
-    print(evaluate(model_SVM, val_loader))
+    print(evaluate(model_CNN, val_loader))
 
 if __name__ == "__main__":
     main()
