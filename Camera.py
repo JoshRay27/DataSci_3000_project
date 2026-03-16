@@ -2,6 +2,7 @@ import cv2
 import torch
 import torchvision.transforms as transforms
 from models.model_CNN import SimpleCNN
+from models.complex_CNN import ASLNet
 from visionPreprocess import preprocess_live
 
 NUM_CLASSES = 10
@@ -44,12 +45,8 @@ def gstreamer_pipeline(
     )
 def main():
 
-    cap = cv2.VideoCapture(
-        "nvarguscamerasrc ! nvvidconv ! "
-        "video/x-raw, format=BGRx ! "
-        "videoconvert ! video/x-raw, format=BGR ! appsink",
-        cv2.CAP_GSTREAMER
-    )
+    cap = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
+
 
     print("Camera opened:", cap.isOpened())
     if not cap.isOpened():
@@ -75,9 +72,8 @@ def main():
 
             roi = frame[y1:y2, x1:x2]
             
-            processed, bbox = preprocess_live(roi)
-            #print("processed shape:", processed.shape, "dtype:", processed.dtype)
-            #print("min/max:", processed.min(), processed.max())
+            #processed, bbox = preprocess_live(roi)
+            processed, bbox, skin_mask, crop = preprocess_live(frame)
 
             tensor = torch.from_numpy(processed).float().unsqueeze(0).to(device)
  
@@ -95,8 +91,9 @@ def main():
                 bx, by, bw, bh = bbox
                 cv2.rectangle(roi, (bx, by), (bx+bw, by+bh), (0, 255, 0), 2)
 
+            cv2.imshow("Skin Mask", skin_mask)
+            cv2.imshow("Final Processed", processed[0] * 255)
 
-            cv2.imshow("Processed", processed[0])
             cv2.imshow("Camera", frame)
             print(f"Prediction: {pred}")
             if cv2.waitKey(1) & 0xFF == 27:

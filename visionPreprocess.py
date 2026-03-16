@@ -2,60 +2,60 @@ import cv2
 import numpy as np
 import os
 
-def preprocess_live(img, size=(128,128)):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5,5), 0)
+def preprocess_live(img, size=(128,128), training=False):
+    H, W, _ = img.shape
 
-    thresh = cv2.adaptiveThreshold(
-        blur, 255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV,
-        11, 2
-    )
-    
-     # 4. Morphological cleanup
+    # --- Skin detection ---
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    lower1 = np.array([0, 20, 70], dtype=np.uint8)
+    upper1 = np.array([20, 255, 255], dtype=np.uint8)
+
+    lower2 = np.array([160, 20, 70], dtype=np.uint8)
+    upper2 = np.array([180, 255, 255], dtype=np.uint8)
+
+    mask1 = cv2.inRange(hsv, lower1, upper1)
+    mask2 = cv2.inRange(hsv, lower2, upper2)
+    skin_mask = cv2.bitwise_or(mask1, mask2)
+
     kernel = np.ones((5,5), np.uint8)
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-    
-    contours, _ = cv2.findContours(
-        thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_CLOSE, kernel)
+    skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_OPEN, kernel)
 
-    H, W = thresh.shape
-    min_area = 0.02 * H * W
-    max_area = 0.4 * H * W
-    
-    candidates = []
+    contours, _ = cv2.findContours(skin_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    for c in contours:
-        x, y, w, h = cv2.boundingRect(c)
-        area = w * h
-        aspect = w/h
-
-        if area < min_area:
-            continue
-        if area > max_area:
-            continue
-        if aspect < 0.3 or aspect > 3.0:
-            continue
-        if h < 0.2 * H:
-            continue
-                
-        candidates.append((area, c))
-
-    if len(candidates) == 0:
+    if len(contours) == 0:
         blank = np.zeros((1, size[0], size[1]), dtype=np.float32)
-        return blank, None
-    _, c = max(candidates, key=lambda x: x[0])
-    x, y, w, h = cv2.boundingRect(c)
-    
-    digit = thresh[y:y+h, x:x+w]
+        return blank, None, skin_mask, None
 
-    digit = cv2.resize(digit, size, interpolation=cv2.INTER_AREA)
+    c = max(contours, key=cv2.contourArea)
+    x, y, w, h = cv2.boundingRect(c)
+
+    # Square crop
+    side = max(w, h)
+    cx = x + w // 2
+    cy = y + h // 2
+
+    x1 = max(cx - side // 2, 0)
+    y1 = max(cy - side // 2, 0)
+    x2 = min(cx + side // 2, W)
+    y2 = min(cy + side // 2, H)
+
+    # Padding
+    pad = int(0.25 * side)
+    x1 = max(x1 - pad, 0)
+    y1 = max(y1 - pad, 0)
+    x2 = min(x2 + pad, W)
+    y2 = min(y2 + pad, H)
+
+    hand_region = img[y1:y2, x1:x2]  # <-- debug crop
+
+    gray = cv2.cvtColor(hand_region, cv2.COLOR_BGR2GRAY)
+    digit = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
     digit = digit.astype("float32") / 255.0
 
-    return digit.reshape(1, size[0], size[1]), (x, y, w, h)
+    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1), skin_mask, hand_region
+
 
 
 def preprocess_image(img, file_name, size=(128,128), ):
