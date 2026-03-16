@@ -26,7 +26,7 @@ def preprocess_live(img, size=(128,128), training=False):
 
     if len(contours) == 0:
         blank = np.zeros((1, size[0], size[1]), dtype=np.float32)
-        return blank, None, skin_mask, None
+        return blank, None
 
     c = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(c)
@@ -54,10 +54,8 @@ def preprocess_live(img, size=(128,128), training=False):
     digit = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
     digit = digit.astype("float32") / 255.0
 
-    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1), skin_mask, hand_region
-
-
-
+    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1)
+    
 def preprocess_image(img, file_name, size=(128,128), ):
     """
     Apply standard ML preprocessing to a single image.

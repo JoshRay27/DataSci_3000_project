@@ -39,7 +39,7 @@ def main():
     
     #model_ASL = ASLNet(num_classes= NUM_CLASSES)
     
-    train(model_CNN, train_loader, epochs=5, lr=1e-3)
+    train(model_CNN, train_loader, epochs=10, lr=1e-3)
     
     torch.save(model_CNN.state_dict(), "cnn_model.pth")
     print("model saved")

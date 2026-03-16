@@ -73,7 +73,7 @@ def main():
             roi = frame[y1:y2, x1:x2]
             
             #processed, bbox = preprocess_live(roi)
-            processed, bbox, skin_mask, crop = preprocess_live(frame)
+            processed, bbox = preprocess_live(frame)
 
             tensor = torch.from_numpy(processed).float().unsqueeze(0).to(device)
  
@@ -91,7 +91,7 @@ def main():
                 bx, by, bw, bh = bbox
                 cv2.rectangle(roi, (bx, by), (bx+bw, by+bh), (0, 255, 0), 2)
 
-            cv2.imshow("Skin Mask", skin_mask)
+            #cv2.imshow("Skin Mask", skin_mask)
             cv2.imshow("Final Processed", processed[0] * 255)
 
             cv2.imshow("Camera", frame)
