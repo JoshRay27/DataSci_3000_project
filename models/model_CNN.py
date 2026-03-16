@@ -13,6 +13,7 @@ class SimpleCNN(nn.Module):
         # Takes the 16 feature maps from conv1 and learns 32 new filter
         
         self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
+        
         # Adaptive Average Pooling:
         # No matter what the input image size is
         # Output will always be 32×7×7 regardless of input size
