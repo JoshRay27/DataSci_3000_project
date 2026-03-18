@@ -5,7 +5,8 @@ from models.model_CNN import SimpleCNN
 from models.complex_CNN import ASLNet
 from visionPreprocess import preprocess_live, preprocess_with_yolo
 from ultralytics import YOLO
-NUM_CLASSES = 2
+from train import NUM_CLASSES
+#NUM_CLASSES = 10
 MODEL_PATH = "simple_cnn_model.pth"
 yolo = YOLO("yolov8n.pt")
 
