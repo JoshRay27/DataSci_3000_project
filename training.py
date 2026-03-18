@@ -13,7 +13,6 @@ def train(model, dataloader, epochs=10, lr=1e-3):
         for imgs, labels in dataloader:
             imgs = imgs.to(device)
             labels = labels.to(device)
-
             optimizer.zero_grad()
             preds = model(imgs)
             loss = criterion(preds, labels)

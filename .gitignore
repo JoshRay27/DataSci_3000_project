@@ -7,10 +7,13 @@ venv/
 
 # Data
 data/
+data_0_1/
 archive\American Sign Language Digits Dataset
-archive.zip
 *.zip
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# YOLO
+*.pt

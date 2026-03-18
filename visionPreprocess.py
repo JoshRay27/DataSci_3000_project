@@ -1,6 +1,19 @@
 import cv2
 import numpy as np
 import os
+from ultralytics import YOLO
+import torch
+import torchvision.transforms as transforms
+
+cnn_transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Grayscale(num_output_channels=1),
+    transforms.Resize((128, 128)),
+    transforms.ToTensor(),  # now shape is (1, H, W)
+    transforms.Normalize(mean=[0.5], std=[0.5])
+])
+
+
 
 def preprocess_live(img, size=(128,128), training=False):
     H, W, _ = img.shape
@@ -26,7 +39,7 @@ def preprocess_live(img, size=(128,128), training=False):
 
     if len(contours) == 0:
         blank = np.zeros((1, size[0], size[1]), dtype=np.float32)
-        return blank, None
+        return blank, None, None
 
     c = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(c)
@@ -42,7 +55,7 @@ def preprocess_live(img, size=(128,128), training=False):
     y2 = min(cy + side // 2, H)
 
     # Padding
-    pad = int(0.25 * side)
+    pad = int(0.05 * side)
     x1 = max(x1 - pad, 0)
     y1 = max(y1 - pad, 0)
     x2 = min(x2 + pad, W)
@@ -51,26 +64,55 @@ def preprocess_live(img, size=(128,128), training=False):
     hand_region = img[y1:y2, x1:x2]  # <-- debug crop
 
     gray = cv2.cvtColor(hand_region, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    gray = clahe.apply(gray)
+    crop_mask = skin_mask[y1:y2, x1:x2]
+    gray[crop_mask == 0] = 0
     digit = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
     digit = digit.astype("float32") / 255.0
 
-    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1)
-    
-def preprocess_image(img, file_name, size=(128,128), ):
-    """
-    Apply standard ML preprocessing to a single image.
-    Convert to grayscale,
-    resize,
-    gaussian blur to redue noise,
-    Normalize pixel values to [0, 1]
-    """
+    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1), hand_region
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-    resized = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
-    denoised = cv2.GaussianBlur(resized, (5,5),0)
-    normalized = denoised.astype("float32") / 255.0
-    print(f"Processed: {file_name}")
-    return normalized
+
+def preprocess_with_yolo(img, yolo_model):
+    """
+    Runs YOLO on an image, crops the highest-confidence detection,
+    and returns a CNN-ready tensor.
+    """
+    # Load image (BGR)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Run YOLO
+    results = yolo_model(img_rgb)[0]
+
+    if len(results.boxes) == 0:
+        return None
+
+    # Select highest-confidence box
+    boxes = results.boxes
+    best_idx = torch.argmax(boxes.conf)
+    x1, y1, x2, y2 = boxes.xyxy[best_idx].cpu().numpy().astype(int)
+
+    # Crop
+    crop = img_rgb[y1:y2, x1:x2]
+    if crop.size == 0:
+        return None
+
+    # Convert to grayscale
+    crop_gray = cv2.cvtColor(crop, cv2.COLOR_RGB2GRAY)
+
+    # Resize to your CNN input size (128×128 or 64×64)
+    crop_gray = cv2.resize(crop_gray, (128, 128))
+
+    # Convert to tensor: (1, H, W)
+    crop_tensor = torch.tensor(crop_gray, dtype=torch.float32).unsqueeze(0) / 255.0
+
+
+    # Apply CNN transforms
+    crop_tensor = cnn_transform(crop_tensor)
+
+    return crop_tensor
+
 
 # Process folder just used for testing
 def process_folder(input_folder, output_folder, size=(128,128)):
@@ -87,7 +129,7 @@ def process_folder(input_folder, output_folder, size=(128,128)):
                 print(f"Skipping unreadable file: {filename}")
                 continue
 
-            processed = preprocess_image(img, size)
+            processed = preprocess_live(img, size)
 
             # convert back to 0-255 for saving
             save_img = (processed * 255).astype("uint8")

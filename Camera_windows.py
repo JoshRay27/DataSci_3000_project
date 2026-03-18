@@ -3,10 +3,11 @@ import torch
 import torchvision.transforms as transforms
 from models.model_CNN import SimpleCNN
 from models.complex_CNN import ASLNet
-from visionPreprocess import preprocess_live
-
-NUM_CLASSES = 10
-MODEL_PATH = "cnn_model.pth"
+from visionPreprocess import preprocess_live, preprocess_with_yolo
+from ultralytics import YOLO
+NUM_CLASSES = 2
+MODEL_PATH = "simple_cnn_model.pth"
+yolo = YOLO("yolov8n.pt")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -46,9 +47,16 @@ def main():
             roi = frame[y1:y2, x1:x2]
 
             # Process the ROI (or full frame depending on your pipeline)
-            processed, bbox = preprocess_live(roi)
+            #processed, bbox, hand_region = preprocess_live(roi)
+            # tensor = torch.from_numpy(processed).float().unsqueeze(0).to(device)
 
-            tensor = torch.from_numpy(processed).float().unsqueeze(0).to(device)
+            tensor =  preprocess_with_yolo(roi, yolo)    
+            if tensor is not None:
+                tensor = tensor.unsqueeze(0).to(device)   # <--- ADD THIS
+            else:
+                continue
+            bbox = None
+            hand_region = None 
 
             with torch.no_grad():
                 output = model(tensor)
@@ -67,9 +75,11 @@ def main():
                 cv2.rectangle(roi, (bx, by), (bx + bw, by + bh), (0, 255, 0), 2)
 
             # Show processed image (scaled back to 0–255)
-            cv2.imshow("Processed", processed[0] * 255)
+            #cv2.imshow("Processed", processed[0])
             cv2.imshow("Camera", frame)
-
+            if hand_region is not None:
+                cv2.imshow("Hand_region", hand_region)
+                #cv2.imshow("Gray", gray)
             print(f"Prediction: {pred}")
 
             if cv2.waitKey(1) & 0xFF == 27:  # ESC key
