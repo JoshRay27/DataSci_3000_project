@@ -51,7 +51,7 @@ while True:
         filepath = os.path.join(folder, filename)
 
         # Save processed image (scaled back to 0–255)
-        save_img = (processed[0] * 255).astype("uint8")
+        save_img = (frame).astype("uint8")
         cv2.imwrite(filepath, save_img)
 
         print(f"Saved {filepath}")

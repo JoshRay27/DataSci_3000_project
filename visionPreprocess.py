@@ -71,7 +71,7 @@ def preprocess_live(img, size=(128,128), training=False):
     digit = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
     digit = digit.astype("float32") / 255.0
 
-    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1), hand_region
+    return digit.reshape(1, size[0], size[1]), (x1, y1, x2-x1, y2-y1), gray
 
 
 def preprocess_with_yolo(img, yolo_model):

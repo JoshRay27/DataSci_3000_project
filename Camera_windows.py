@@ -6,6 +6,7 @@ from models.complex_CNN import ASLNet
 from visionPreprocess import preprocess_live, preprocess_with_yolo
 from ultralytics import YOLO
 from train import NUM_CLASSES
+
 #NUM_CLASSES = 10
 MODEL_PATH = "simple_cnn_model.pth"
 yolo = YOLO("yolov8n.pt")
@@ -48,10 +49,11 @@ def main():
             roi = frame[y1:y2, x1:x2]
 
             # Process the ROI (or full frame depending on your pipeline)
-            #processed, bbox, hand_region = preprocess_live(roi)
+            live, bbox, hand_region = preprocess_live(roi)
             # tensor = torch.from_numpy(processed).float().unsqueeze(0).to(device)
 
             tensor =  preprocess_with_yolo(roi, yolo)    
+
             if tensor is not None:
                 tensor = tensor.unsqueeze(0).to(device)   # <--- ADD THIS
             else:
@@ -78,6 +80,7 @@ def main():
             # Show processed image (scaled back to 0–255)
             #cv2.imshow("Processed", processed[0])
             cv2.imshow("Camera", frame)
+            #cv2.imshow("Live", live)
             if hand_region is not None:
                 cv2.imshow("Hand_region", hand_region)
                 #cv2.imshow("Gray", gray)

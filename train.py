@@ -6,9 +6,9 @@ from models.complex_CNN import ASLNet
 from models.SVM import SVMClassifier
 from training import train, evaluate
 
-DATA_DIR = "data/"
+DATA_DIR = "data_0_1/"
 BATCH_SIZE = 32
-NUM_CLASSES = 10
+NUM_CLASSES = 2
 
 def main():
     # load full dataset
@@ -30,22 +30,22 @@ def main():
     val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE)
     #test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
-    model_CNN = SimpleCNN(num_classes=NUM_CLASSES)
-    train(model_CNN, train_loader, epochs=10, lr=1e-3)
-    torch.save(model_CNN.state_dict(), "simple_cnn_model.pth")
+    model = SimpleCNN(num_classes=NUM_CLASSES)
+    train(model, train_loader, epochs=10, lr=1e-3)
+    torch.save(model.state_dict(), "simple_cnn_model.pth")
     print("model saved")
     print("Model_CNN Evaluation")
-    print(evaluate(model_CNN, val_loader))
+    print(evaluate(model, val_loader))
 
     #model_SVM = SVMClassifier(input_dim=input_dim, num_classes=10)
     #train(model_SVM, train_loader, epochs=5, lr=1e-3)
     
-    '''model_ASL = ASLNet(num_classes= NUM_CLASSES)
-    train(model_ASL, train_loader, epochs=10, lr=1e-3)
-    torch.save(model_ASL.state_dict(), "cnn_model.pth")
+    '''model = ASLNet(num_classes= NUM_CLASSES)
+    train(model, train_loader, epochs=10, lr=1e-3)
+    torch.save(model.state_dict(), "cnn_model.pth")
     print("model saved")
     print("Model_ASL Evaluation")
-    print(evaluate(model_ASL, val_loader))'''
+    print(evaluate(model, val_loader))'''
 
 if __name__ == "__main__":
     main()
