@@ -25,7 +25,7 @@ class SimpleCNN(nn.Module):
         self.fc1 = nn.Linear(32 * 7 * 7, 128)
 
         # Final Classification Layer:
-        # Maps the 128 features to the number of utput classes.
+        # Maps the 128 features to the number of output classes.
         self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, x):

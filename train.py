@@ -6,7 +6,7 @@ from models.complex_CNN import ASLNet
 from models.SVM import SVMClassifier
 from training import train, evaluate
 
-DATA_DIR = "data_0_1/"
+DATA_DIR = "data"
 BATCH_SIZE = 32
 NUM_CLASSES = 2
 
@@ -32,7 +32,7 @@ def main():
 
     model = SimpleCNN(num_classes=NUM_CLASSES)
     train(model, train_loader, epochs=10, lr=1e-3)
-    torch.save(model.state_dict(), "simple_cnn_model.pth")
+    torch.save(model.state_dict(), "simple_cnn_model_3.pth")
     print("model saved")
     print("Model_CNN Evaluation")
     print(evaluate(model, val_loader))

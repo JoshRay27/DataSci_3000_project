@@ -13,6 +13,8 @@ data/
 data_0_1/
 archive\American Sign Language Digits Dataset
 *.zip
+Test_data/
+my_data_processed/
 
 # OS files
 .DS_Store
@@ -20,3 +22,5 @@ Thumbs.db
 
 # YOLO
 *.pt
+
+*.MP4

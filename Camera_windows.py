@@ -83,7 +83,7 @@ def main():
             #cv2.imshow("Live", live)
             if hand_region is not None:
                 cv2.imshow("Hand_region", hand_region)
-                #cv2.imshow("Gray", gray)
+               # cv2.imshow("Gray", )
             print(f"Prediction: {pred}")
 
             if cv2.waitKey(1) & 0xFF == 27:  # ESC key

@@ -101,7 +101,7 @@ def preprocess_with_yolo(img, yolo_model):
     # Convert to grayscale
     crop_gray = cv2.cvtColor(crop, cv2.COLOR_RGB2GRAY)
 
-    # Resize to your CNN input size (128×128 or 64×64)
+    # Resize to input size (128×128 or 64×64)
     crop_gray = cv2.resize(crop_gray, (128, 128))
 
     # Convert to tensor: (1, H, W)
